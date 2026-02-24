@@ -12,8 +12,6 @@ This project is a tribute to the era of skeuomorphic design and interactive desk
 
 <div align="center">
 
-<img src=".github/running.jpg" alt="Bonzi Buddy Screenshot" width="500" />
-
 </div>
 
 ---
@@ -44,8 +42,6 @@ This BonziBUDDY simulation has been rebuilt from the ground up to be feature-com
 
 *   **Notes Manager:** Includes a fully functional notes utility where users can create, view, edit, and delete personal notes, which are then saved to their user file.
 
-*   **Safe & Spyware-Free:** This simulation is completely safe. It contains no spyware, trackers, or malware. All data is stored locally in your browser's storage for the `xp.quenq.com` website and is never transmitted.
-
 ## Installation Instructions
 
 BonziBUDDY must be installed via the App Market inside Reborn XP.
@@ -74,7 +70,7 @@ Contributions are welcome. If you have a feature suggestion or a bug fix, please
 
 This project is a **simulation** and a work of parody created for entertainment and educational purposes. **It is NOT real spyware or malware.**
 
-The "personal information" BonziBUDDY asks for (name, age, etc.) is only used within the simulation for entertainment and educational purposes—you can even enter fake data. All data, including the notes you save, is stored locally in your browser's private storage for the `xp.quenq.com` website and is **never transmitted** off your computer. The `top_secret_user.txt` file is created on your *virtual* D: drive inside the simulator, not on your real computer's hard drive.
+The "personal information" BonziBUDDY asks for (name, age, etc.) is only used within the simulation for entertainment and educational purposes. All data, including the notes you save, is stored locally in your browser's private storage and is **never transmitted** off your computer. The `top_secret_user.txt` file is created on your *virtual* D: drive inside the simulator, not on your real computer's hard drive.
 
 <div align="center">
 
