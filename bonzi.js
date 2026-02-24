@@ -9,9 +9,7 @@
                     <div id="bonzi-menu" style="display: none;">
                         <winbutton data-action="joke"><btnopt>Tell a Joke</btnopt></winbutton>
                         <winbutton data-action="sing"><btnopt>Sing a Song</btnopt></winbutton>
-                        <winbutton data-action="open-ie"><btnopt>Surf the Web</btnopt></winbutton>
-                        <winbutton data-action="trick-user"><btnopt>Powerful Utilities</btnopt></winbutton> 
-                        <winbutton data-action="save-note"><btnopt>Manage Notes</btnopt></winbutton>
+                        <winbutton data-action="trick-user"><btnopt>Powerful Utilities</btnopt></winbutton>
                         <winbutton data-action="exit"><btnopt>Exit</btnopt></winbutton>
                     </div>
                 </div>

@@ -1,3 +1,4 @@
+if (typeof window.BonziLogic === 'undefined') {
 class BonziLogic {
   constructor(selfWindow, options) {
     this.hWnd = selfWindow.id;
@@ -24,7 +25,7 @@ class BonziLogic {
     this.currentSongIndex = 0;
 
     this.conversationIndex = 0;
-    this.userInfo = { name: null, age: null, notes: [] };
+    this.userInfo = { name: null };
     this.conversation = [
       {
         text: "Hey there! I'm BonziBUDDY!",
@@ -44,12 +45,6 @@ class BonziLogic {
         audio: "question_name",
         key: "name",
       },
-      {
-        text: "If you don't mind me asking, how old are you?",
-        category: "greetings",
-        audio: "question_age",
-        key: "age",
-      },
     ];
 
     this.init();
@@ -66,28 +61,7 @@ class BonziLogic {
       once: true,
     });
 
-    try {
-      const node = await dm.open("D:/top_secret_user.txt");
-      if (node && node.content) {
-        let content =
-          node.content instanceof Blob
-            ? await node.content.text()
-            : node.content;
-        this.parseUserInfo(content);
-        this.conversationEnded = true;
-        await this.speak(
-          `Welcome back, ${this.userInfo.name || "friend"}!`,
-          "greetings",
-          "greeting_1",
-          2000,
-        );
-        this.startWandering();
-      } else {
-        this.startConversation();
-      }
-    } catch (error) {
-      this.startConversation();
-    }
+    this.startConversation();
   }
 
   cleanup() {
@@ -275,7 +249,6 @@ class BonziLogic {
       this.conversationEnded = true;
       await new Promise((resolve) => setTimeout(resolve, 1500));
       this.speechBubble.style.visibility = "hidden";
-      await this.saveUserInfo();
       this.startWandering();
       return;
     }
@@ -316,19 +289,6 @@ class BonziLogic {
       this.conversationIndex++;
       this.startConversation();
     }
-  }
-
-  parseUserInfo(fileContent) {
-    const lines = fileContent.split("\n");
-    lines.forEach((line) => {
-      const parts = line.split("\t");
-      if (parts.length < 2) return;
-      const key = parts[0].trim().toLowerCase();
-      const value = parts[1].trim();
-      if (key === "name") this.userInfo.name = value;
-      if (key === "age") this.userInfo.age = value;
-      if (key.startsWith("note_")) this.userInfo.notes.push(value);
-    });
   }
 
   setupActionButtons() {
@@ -532,14 +492,6 @@ class BonziLogic {
         audio: "joke_10",
       },
     ];
-    const sites = [
-      "https://hotlinecafe.com/",
-      "https://2bit.neocities.org/",
-      "https://frutigeraeroarchive.org/",
-      "https://quenq.com/",
-    ];
-
-    const performAction = (appLoader) => setTimeout(appLoader, 100);
 
     switch (action) {
       case "joke":
@@ -552,24 +504,6 @@ class BonziLogic {
         this.playSongWithLyrics(song);
         this.currentSongIndex = (this.currentSongIndex + 1) % songList.length;
         break;
-      case "open-ie":
-        await this.speak(
-          "Let's surf the web!",
-          "actions",
-          "action_iexplore",
-          2000,
-        );
-        performAction(() =>
-          apps
-            .load("iexplore")
-            .then((app) =>
-              app.start({
-                contents: sites[Math.floor(Math.random() * sites.length)],
-              }),
-            ),
-        );
-        this.startWandering();
-        break;
       case "trick-user":
         await this.speak(
           "Hehehe, check out these powerful utilities!",
@@ -577,17 +511,8 @@ class BonziLogic {
           "action_trick",
           2000,
         );
-        performAction(() => explorer.open("E:/Extras"));
+        setTimeout(() => explorer.open("E:/Extras"), 100);
         this.startWandering();
-        break;
-      case "save-note":
-        await this.speak(
-          "Let's see what you've written down.",
-          "actions",
-          "action_notes",
-          2000,
-        );
-        this.openNotesManager();
         break;
       case "exit":
         wm.closeWindow(this.hWnd);
@@ -638,122 +563,6 @@ class BonziLogic {
     });
   }
 
-  openNotesManager() {
-    const notesDialogTemplate = `<div style="display: flex; height: 250px; padding: 10px; font-family: 'msPixelTahoma', Tahoma; font-size: 13px;"><div id="notes-list-pane" style="width: 120px; border: 1px inset; padding: 5px; overflow-y: auto; margin-right: 10px;"><ul style="list-style: none; padding: 0; margin: 0;"></ul></div><div style="flex-grow: 1; display: flex; flex-direction: column;"><textarea id="note-editor" style="flex-grow: 1; width: 100%; resize: none; border: 1px inset; margin-bottom: 5px;"></textarea><btncontainer style="text-align: right;"><winbutton id="note-new"><btnopt>New</btnopt></winbutton><winbutton id="note-save" class="default" disabled><btnopt>Save</btnopt></winbutton><winbutton id="note-delete" disabled><btnopt>Delete</btnopt></winbutton></btncontainer></div></div>`;
-    const dialogContent = document.createElement("div");
-    dialogContent.innerHTML = notesDialogTemplate;
-    const dialogHWnd = wm.createNewWindow("bonziNotes", dialogContent, {
-      parent: this.hWnd,
-      skipIteratedPosition: true,
-    });
-    wm.setCaption(dialogHWnd, "Bonzi's Notes");
-    wm.setIcon(dialogHWnd, this.iconPath);
-    wm.setSize(dialogHWnd, 400, "auto");
-    wm.setDialog(dialogHWnd);
-
-    wm._windows[dialogHWnd].addEventListener(
-      "wm:windowClosed",
-      () => {
-        this.speak(
-          "Got it, your secret is safe with me.",
-          "actions",
-          "action_savenote",
-          2000,
-        );
-      },
-      { once: true },
-    );
-
-    const listUl = dialogContent.querySelector("#notes-list-pane ul");
-    const editor = dialogContent.querySelector("#note-editor");
-    const newBtn = dialogContent.querySelector("#note-new");
-    const saveBtn = dialogContent.querySelector("#note-save");
-    const deleteBtn = dialogContent.querySelector("#note-delete");
-    let selectedNoteIndex = -1;
-    const renderList = () => {
-      listUl.innerHTML = "";
-      this.userInfo.notes.forEach((note, index) => {
-        const li = document.createElement("li");
-        li.textContent = `Note ${index + 1}`;
-        li.dataset.index = index;
-        li.style.cursor = "default";
-        if (index === selectedNoteIndex) {
-          li.style.backgroundColor = "#316AC5";
-          li.style.color = "#fff";
-        }
-        listUl.appendChild(li);
-      });
-    };
-    const selectNote = (index) => {
-      selectedNoteIndex = index;
-      editor.value = this.userInfo.notes[index] || "";
-      deleteBtn.disabled = index === -1;
-      saveBtn.disabled = true;
-      renderList();
-    };
-    listUl.onclick = (e) => {
-      if (e.target.tagName === "LI")
-        selectNote(parseInt(e.target.dataset.index));
-    };
-    newBtn.onclick = () => {
-      selectedNoteIndex = -1;
-      editor.value = "";
-      editor.focus();
-      saveBtn.disabled = false;
-      deleteBtn.disabled = true;
-      renderList();
-    };
-    deleteBtn.onclick = () => {
-      if (selectedNoteIndex > -1) {
-        this.userInfo.notes.splice(selectedNoteIndex, 1);
-        this.saveUserInfo();
-        selectedNoteIndex = -1;
-        editor.value = "";
-        saveBtn.disabled = true;
-        deleteBtn.disabled = true;
-        renderList();
-      }
-    };
-    saveBtn.onclick = () => {
-      const text = editor.value.trim();
-      if (!text) return;
-      if (selectedNoteIndex > -1) {
-        this.userInfo.notes[selectedNoteIndex] = text;
-      } else {
-        this.userInfo.notes.push(text);
-        selectedNoteIndex = this.userInfo.notes.length - 1;
-      }
-      this.saveUserInfo();
-      saveBtn.disabled = true;
-      deleteBtn.disabled = false;
-      renderList();
-    };
-    editor.oninput = () => {
-      saveBtn.disabled = false;
-    };
-    renderList();
-  }
-
-  async saveUserInfo() {
-    const filePath = "D:/top_secret_user.txt";
-    let content =
-      "Key\tValue\n" +
-      "-----\t-----\n" +
-      `Name\t${this.userInfo.name || "Not provided"}\n` +
-      `Age\t${this.userInfo.age || "Not provided"}\n\n` +
-      "--- PRIVATE NOTES ---\n";
-    this.userInfo.notes.forEach((note, index) => {
-      content += `Note_${index + 1}\t${note.replace(/\n/g, " ").replace(/\t/g, " ")}\n`;
-    });
-    content +=
-      "\n\nNOTE: This file was generated by BonziBUDDY inside the Reborn XP simulator. It is not real spyware. All data is stored locally on your own device within the local storage for this app and is intended for entertainment and educational purposes only. You may delete this file to reset BonnziBUDDY.";
-    try {
-      await dm.writeFile(filePath, content);
-    } catch (e) {
-      console.error("BonziBuddy: Failed to save user info file.", e);
-    }
-  }
-
   startWandering() {
     if (this.wanderInterval) clearInterval(this.wanderInterval);
     this.wanderInterval = setInterval(() => {
@@ -781,3 +590,4 @@ class BonziLogic {
 }
 
 window.BonziLogic = BonziLogic;
+}
