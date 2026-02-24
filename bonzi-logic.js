@@ -25,26 +25,17 @@ class BonziLogic {
     this.currentSongIndex = 0;
 
     this.conversationIndex = 0;
-    this.userInfo = { name: null };
     this.conversation = [
       {
         text: "Hey there! I'm BonziBUDDY!",
         category: "greetings",
-        audio: "greeting_1",
-        key: null,
+        audio: "greeting_1"
       },
       {
         text: "It's great to meet you! I'm here to help.",
         category: "greetings",
-        audio: "greeting_2",
-        key: null,
-      },
-      {
-        text: "First things first, what should I call you?",
-        category: "greetings",
-        audio: "question_name",
-        key: "name",
-      },
+        audio: "greeting_2"
+      }
     ];
 
     this.init();
@@ -241,13 +232,7 @@ class BonziLogic {
     const step = this.conversation[this.conversationIndex];
 
     if (!step) {
-      await this.speak(
-        "Excellent! Thanks for sharing. I'll remember that.",
-        "greetings",
-        "outro_1",
-      );
       this.conversationEnded = true;
-      await new Promise((resolve) => setTimeout(resolve, 1500));
       this.speechBubble.style.visibility = "hidden";
       this.startWandering();
       return;
@@ -256,39 +241,8 @@ class BonziLogic {
     await this.speak(step.text, step.category, step.audio);
     if (this.conversationEnded) return;
 
-    if (step.key) {
-      this.inputField.style.display = "block";
-      this.inputField.focus();
-
-      let submitted = false;
-      const handleSubmit = () => {
-          if (submitted || this.inputField.value.trim() === "") return;
-          submitted = true;
-
-          this.userInfo[step.key] = this.inputField.value;
-          this.inputField.value = "";
-          this.inputField.style.display = "none";
-
-          this.inputField.removeEventListener('keydown', onEnter);
-          this.inputField.removeEventListener('blur', handleSubmit);
-
-          this.conversationIndex++;
-          this.startConversation();
-      };
-
-      const onEnter = (e) => {
-          if (e.key === 'Enter') {
-              handleSubmit();
-          }
-      };
-
-      this.inputField.addEventListener('keydown', onEnter);
-      this.inputField.addEventListener('blur', handleSubmit);
-      
-    } else {
-      this.conversationIndex++;
-      this.startConversation();
-    }
+    this.conversationIndex++;
+    this.startConversation();
   }
 
   setupActionButtons() {
